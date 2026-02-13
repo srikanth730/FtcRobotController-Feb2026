@@ -211,10 +211,10 @@ public class DecodeRi3D extends OpMode {
          * Here we give the user control of the speed of the launcher motor without automatically
          * queuing a shot.
          */
-        if (gamepad1.y) {
+        if (gamepad2.y) {
             leftLauncher.setVelocity(launcherTarget);
             rightLauncher.setVelocity(launcherTarget);
-        } else if (gamepad1.b) { // stop flywheel
+        } else if (gamepad2.b) { // stop flywheel
             leftLauncher.setVelocity(STOP_SPEED);
             rightLauncher.setVelocity(STOP_SPEED);
         }
@@ -235,7 +235,7 @@ public class DecodeRi3D extends OpMode {
         /*
          * Left bumper test for diverter - press and hold to move diverter
          */
-        if (gamepad1.left_bumper) {
+        if (gamepad2.left_bumper) {
             diverter.setPosition(1.0);
         } else {
             diverter.setPosition(0.0);
@@ -249,12 +249,12 @@ public class DecodeRi3D extends OpMode {
                     break;
                 case OFF:
                     intakeState = IntakeState.ON;
-                    intake.setPower(0.75);
+                    intake.setPower(1.00);
                     break;
             }
         }
 
-        if (gamepad2.rightBumperWasPressed()) {
+        if (gamepad1.rightBumperWasPressed()) {
             switch (launcherDistance) {
                 case CLOSE:
                     launcherDistance = LauncherDistance.FAR;
@@ -272,8 +272,8 @@ public class DecodeRi3D extends OpMode {
         /*
          * Now we call our "Launch" function.
          */
-        launchLeft(gamepad1.leftBumperWasPressed());
-        launchRight(gamepad1.rightBumperWasPressed());
+       // launchLeft(gamepad1.leftBumperWasPressed());
+        launchRight(gamepad2.rightBumperWasPressed());
 
         /*
          * Show the state and motor powers
