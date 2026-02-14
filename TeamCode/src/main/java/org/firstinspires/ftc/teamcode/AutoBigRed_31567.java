@@ -34,27 +34,17 @@ public class AutoBigRed_31567 extends LinearOpMode {
     private CRServo leftFeeder, rightFeeder;
     private Servo diverter;
     private DcMotor intake = null;
+
     ElapsedTime leftFeederTimer = new ElapsedTime();
     ElapsedTime rightFeederTimer = new ElapsedTime();
-    private enum IntakeState {
-        ON,
-        OFF;
-    }
 
-    private enum LaunchState {
-        IDLE,
-        SPIN_UP,
-        LAUNCH,
-        LAUNCHING,
-    }
+    private enum IntakeState { ON, OFF; }
+
+    private enum LaunchState { IDLE, SPIN_UP, LAUNCH, LAUNCHING, }
     private LaunchState leftLaunchState;
     private LaunchState rightLaunchState;
-    private enum DiverterDirection {
-        LEFT,
-        RIGHT;
-    }
-    //private DiverterDirection diverterDirection = DiverterDirection.LEFT;
-    //private IntakeState intakeState = IntakeState.OFF;
+
+    private enum DiverterDirection { LEFT, RIGHT; }
 
     private static final double FEED_TIME_SECONDS = 0.80;
     private static final double STOP_SPEED = 0.0;
@@ -70,16 +60,16 @@ public class AutoBigRed_31567 extends LinearOpMode {
     private static final double RIGHT_POSITION = 0.0;
 
     // -------------------- COUNTS/INCH --------------------
-    static final double COUNTS_PER_MOTOR_REV  = 537.7;          // Yellow Jacket 312RPM (typical)
-    static final double DRIVE_GEAR_REDUCTION  = 1.0;            // change if external gearing
-    static final double WHEEL_DIAMETER_INCHES = 104.0 / 25.4;   // Ø104mm
+    static final double COUNTS_PER_MOTOR_REV  = 537.7;
+    static final double DRIVE_GEAR_REDUCTION  = 1.0;
+    static final double WHEEL_DIAMETER_INCHES = 104.0 / 25.4;
     static final double COUNTS_PER_INCH =
             (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) / (WHEEL_DIAMETER_INCHES * Math.PI);
 
     // -------------------- TUNABLES --------------------
-    static final double DRIVE_SPEED  = 0.90; // per your request
-    static final double STRAFE_SPEED = 0.90; // keep lower for accuracy // 60 init
-    static final double TURN_SPEED   = 0.40; // 0.25 init
+    static final double DRIVE_SPEED  = 0.90;
+    static final double STRAFE_SPEED = 0.90;
+    static final double TURN_SPEED   = 0.40;
 
     static final double HEADING_THRESHOLD_DEG = 1.0;
     static final double P_TURN_GAIN  = 0.02;
@@ -88,8 +78,8 @@ public class AutoBigRed_31567 extends LinearOpMode {
     static final double MAX_CORRECTION = 0.28;
 
     // -------------------- HEADINGS --------------------
-    static final double HEADING_GOAL_DEG   = 0.0;  // after imu.resetYaw()
-    static final double HEADING_LEFT45_DEG = 45.0;
+    static final double HEADING_GOAL_DEG     = 0.0;   // after imu.resetYaw()
+    static final double HEADING_RIGHT45_DEG = -45.0; // MIRROR of Blue's +45
 
     // -------------------- STEP COUNTER --------------------
     private int stepNum = 0;
@@ -115,19 +105,19 @@ public class AutoBigRed_31567 extends LinearOpMode {
         leftLaunchState = LaunchState.IDLE;
         rightLaunchState = LaunchState.IDLE;
 
-        // Drive directions (per your earlier setup)
+        // Drive directions
         leftFrontDrive.setDirection(DcMotor.Direction.REVERSE);
         rightFrontDrive.setDirection(DcMotor.Direction.FORWARD);
         leftBackDrive.setDirection(DcMotor.Direction.REVERSE);
         rightBackDrive.setDirection(DcMotor.Direction.FORWARD);
 
-        // Launcher + feeder directions (from your TeleOp)
+        // Launcher + feeder directions
         leftLauncher.setDirection(DcMotorSimple.Direction.REVERSE);
         rightFeeder.setDirection(DcMotorSimple.Direction.REVERSE);
 
         intake.setDirection(DcMotorSimple.Direction.REVERSE);
 
-        // IMU init (edit if hub orientation differs)
+        // IMU init
         RevHubOrientationOnRobot.LogoFacingDirection logoDirection = RevHubOrientationOnRobot.LogoFacingDirection.UP;
         RevHubOrientationOnRobot.UsbFacingDirection usbDirection   = RevHubOrientationOnRobot.UsbFacingDirection.BACKWARD;
         imu = hardwareMap.get(IMU.class, "imu");
@@ -153,7 +143,7 @@ public class AutoBigRed_31567 extends LinearOpMode {
         rightFeeder.setDirection(DcMotorSimple.Direction.REVERSE);
 
         while (opModeInInit()) {
-            telemetry.addLine("Ready: Decode 2026 Blue Goal Auto V4");
+            telemetry.addLine("Ready: Decode 2026 RED Goal Auto");
             telemetry.addData("Heading (deg)", "%.1f", getHeading());
             telemetry.addData("Counts/Inch", "%.2f", COUNTS_PER_INCH);
             telemetry.addData("Drive/Strafe/Turn", "%.2f / %.2f / %.2f", DRIVE_SPEED, STRAFE_SPEED, TURN_SPEED);
@@ -162,9 +152,9 @@ public class AutoBigRed_31567 extends LinearOpMode {
 
         imu.resetYaw();
 
-        // ==================== AUTON STEPS (your latest list) ====================
-        //spunUp = spinUpLauncher(1.25);
-        step(1, "Start: front touching blue goal; launcher in back");
+        // ==================== AUTON STEPS (RED GOAL / RIGHT SIDE MIRROR) ====================
+
+        step(1, "Start: front touching RED goal; launcher in back");
         leftLauncher.setVelocity(launcherTarget);
         rightLauncher.setVelocity(launcherTarget);
         intake.setPower(1.00);
@@ -172,117 +162,59 @@ public class AutoBigRed_31567 extends LinearOpMode {
         step(2, "Back 52 in, hold 0 deg");
         driveStraight(DRIVE_SPEED, -52.0, HEADING_GOAL_DEG);
 
-        step(3, "Shoot first 3 artifacts, wait 3s");
+        step(3, "Shoot first 3 artifacts");
         rightFeeder.setPower(FULL_SPEED);
-        //sleep(3000);
-        diverter.setPosition(0.99);
-        sleep(500);
-        diverter.setPosition(0.05);
-        sleep(500);
-        diverter.setPosition(0.99);
-        sleep(500);
-        diverter.setPosition(0.05);
-        sleep(500);
-        //diverter.setPosition(0.99);
-        //sleep(500);
-        //diverter.setPosition(0.05);
-        //sleep(500);
-
+        diverter.setPosition(0.99); sleep(500);
+        diverter.setPosition(0.05); sleep(500);
+        diverter.setPosition(0.99); sleep(500);
+        diverter.setPosition(0.05); sleep(500);
         rightFeeder.setPower(STOP_SPEED);
-        //shoot3ArtifactsAndWait3s();
 
-        step(4, "Turn left to 45 deg");
-        turnToHeading(TURN_SPEED, HEADING_LEFT45_DEG);
+        step(4, "Turn RIGHT to -45 deg");
+        turnToHeading(TURN_SPEED, HEADING_RIGHT45_DEG);
 
+        step(6, "Forward 38 in, hold -45 deg");
+        driveStraight(DRIVE_SPEED, 38.0, HEADING_RIGHT45_DEG);
 
-        step(6, "Forward 28 in, hold 45 deg");
-        driveStraight(DRIVE_SPEED, 38.0, HEADING_LEFT45_DEG);
-        //intake.setPower(0.00);
-
-        step(7, "Back 28 in; turn to 0 deg (return step2 pose)");
-        driveStraight(DRIVE_SPEED, -38.0, HEADING_LEFT45_DEG);
+        step(7, "Back 38 in; turn to 0 deg (return step2 pose)");
+        driveStraight(DRIVE_SPEED, -38.0, HEADING_RIGHT45_DEG);
         turnToHeading(TURN_SPEED, HEADING_GOAL_DEG);
 
-        step(8, "Shoot second 3 artifacts, wait 3s");
-        //shoot3ArtifactsAndWait3s();
+        step(8, "Shoot second 3 artifacts");
         rightFeeder.setPower(FULL_SPEED);
-        //sleep(3000);
-        diverter.setPosition(0.99);
-        sleep(500);
-        diverter.setPosition(0.05);
-        sleep(500);
-        diverter.setPosition(0.99);
-        sleep(500);
-        diverter.setPosition(0.05);
-        sleep(500);
-        //diverter.setPosition(0.99);
-        //sleep(500);
-        //diverter.setPosition(0.05);
-        //sleep(500);
-
+        diverter.setPosition(0.99); sleep(500);
+        diverter.setPosition(0.05); sleep(500);
+        diverter.setPosition(0.99); sleep(500);
+        diverter.setPosition(0.05); sleep(500);
         rightFeeder.setPower(STOP_SPEED);
 
+        step(9, "Turn RIGHT to -45 deg");
+        turnToHeading(TURN_SPEED, HEADING_RIGHT45_DEG);
 
-        step(9, "Turn left to 45 deg");
-        turnToHeading(TURN_SPEED, HEADING_LEFT45_DEG);
+        step(10, "Strafe RIGHT 31 in, hold -45 deg");
+        strafeDistance(STRAFE_SPEED, 31.0, HEADING_RIGHT45_DEG);
 
-        //intake.setPower(1.00);
-        step(10, "Strafe left 24 in, hold 45 deg");
-        strafeDistance(STRAFE_SPEED, -31.0, HEADING_LEFT45_DEG);
-        //intake.setPower(0.00);
+        step(11, "Forward 42 in, hold -45 deg");
+        driveStraight(DRIVE_SPEED, 42.0, HEADING_RIGHT45_DEG);
 
-        step(11, "Forward 28 in, hold 45 deg");
-        driveStraight(DRIVE_SPEED, 42.0, HEADING_LEFT45_DEG);
-
-        step(12, "Back 28; strafe right 24; turn 0 (return step2 pose)");
-        driveStraight(DRIVE_SPEED, -42.0, HEADING_LEFT45_DEG);
-        strafeDistance(STRAFE_SPEED, 31.0, HEADING_LEFT45_DEG);
+        step(12, "Back 42; strafe LEFT 31; turn 0 (return step2 pose)");
+        driveStraight(DRIVE_SPEED, -42.0, HEADING_RIGHT45_DEG);
+        strafeDistance(STRAFE_SPEED, -31.0, HEADING_RIGHT45_DEG);
         turnToHeading(TURN_SPEED, HEADING_GOAL_DEG);
 
-        step(13, "Shoot third 3 artifacts, wait 3s");
-        //shoot3ArtifactsAndWait3s();
-       // rightFeeder.setPower(STOP_SPEED);
+        step(13, "Shoot third 3 artifacts");
         rightFeeder.setPower(FULL_SPEED);
-        //sleep(3000);
-        diverter.setPosition(0.99);
-        sleep(500);
-        diverter.setPosition(0.05);
-        sleep(500);
-       // diverter.setPosition(0.99);
-        //sleep(500);
-        //diverter.setPosition(0.05);
-        //sleep(500);
-        //diverter.setPosition(0.99);
-        //sleep(500);
-        //diverter.setPosition(0.05);
-        //sleep(500);
+        diverter.setPosition(0.99); sleep(500);
+        diverter.setPosition(0.05); sleep(500);
         rightFeeder.setPower(STOP_SPEED);
 
-        step(14, "Turn left to 45 deg");
-        turnToHeading(TURN_SPEED, HEADING_LEFT45_DEG);
+        step(14, "Turn RIGHT to -45 deg");
+        turnToHeading(TURN_SPEED, HEADING_RIGHT45_DEG);
 
-        //intake.setPower(1.00);
-        step(15, "Strafe left 36 in, hold 45 deg");
-        strafeDistance(STRAFE_SPEED, -30.0, HEADING_LEFT45_DEG); //changed from 36 to 42
-        //intake.setPower(0.00);
-/*
-        step(16, "Forward 28 in, hold 45 deg");
-        driveStraight(DRIVE_SPEED, 28.0, HEADING_LEFT45_DEG);
+        step(15, "Strafe RIGHT 30 in, hold -45 deg");
+        strafeDistance(STRAFE_SPEED, 30.0, HEADING_RIGHT45_DEG);
 
-        step(17, "Return step2 pose: back 28; strafe right 36; turn 0");
-        driveStraight(DRIVE_SPEED, -28.0, HEADING_LEFT45_DEG);
-        strafeDistance(STRAFE_SPEED, 30.0, HEADING_LEFT45_DEG); //changed from 36
-        turnToHeading(TURN_SPEED, HEADING_GOAL_DEG);
-
-        step(18, "Shoot 3 artifacts, wait 3s");
-        shoot3ArtifactsAndWait3s();
-        rightFeeder.setPower(STOP_SPEED);
-
-        step(19, "Strafe left 20 in, hold 0 deg");
-        strafeDistance(STRAFE_SPEED, -20.0, HEADING_GOAL_DEG);
-*/
         // Stop everything
-        //moveRobot(0.0, 0.0, 0.0);
         stopLauncher();
         intake.setPower(0.00);
         rightLauncher.setPower(0.0);
@@ -290,8 +222,6 @@ public class AutoBigRed_31567 extends LinearOpMode {
 
         telemetry.addLine("AUTO COMPLETE");
         telemetry.update();
-        //sleep(500);
-
     }
 
     // =========================================================================================
@@ -308,24 +238,17 @@ public class AutoBigRed_31567 extends LinearOpMode {
     }
 
     // =========================================================================================
-    // LAUNCHER: Shoot 3 + wait 3 seconds
+    // LAUNCHER: Shoot 3 + wait 3 seconds (unused in your current flow)
     // =========================================================================================
     private void shoot3ArtifactsAndWait3s() {
-        //boolean spunUp = spinUpLauncher(1.25);
-
         if (spunUp && opModeIsActive()) {
-
-            rightFeeder.setPower(FULL_SPEED); //new change start feeder
-            sleep(1000); //new change for first set launch
+            rightFeeder.setPower(FULL_SPEED);
+            sleep(1000);
             fireOneShotRight();
             fireOneShotRight();
             fireOneShotRight();
-
-            rightFeeder.setPower(STOP_SPEED); //stop feeder
+            rightFeeder.setPower(STOP_SPEED);
         }
-
-        //sleep(3000); sleep already in firing shot
-        //stopLauncher();
     }
 
     private boolean spinUpLauncher(double timeoutSeconds) {
@@ -335,7 +258,6 @@ public class AutoBigRed_31567 extends LinearOpMode {
         long start = System.currentTimeMillis();
         while (opModeIsActive() && (System.currentTimeMillis() - start) < (long) (timeoutSeconds * 1000.0)) {
             if (rightLauncher.getVelocity() >= launcherMin) return true;
-            //telemetry.addData("STEP %d Launcher", stepNum, "Spin-up");
             telemetry.addData("Vel L/R", "%.0f / %.0f", leftLauncher.getVelocity(), rightLauncher.getVelocity());
             telemetry.update();
             sleep(10);
@@ -345,29 +267,21 @@ public class AutoBigRed_31567 extends LinearOpMode {
 
     private void fireOneShotRight() {
         if (!opModeIsActive()) return;
-        //rightFeeder.setPower(FULL_SPEED);
-        //switchDiverterDirection (diverterDirection);
         diverter.setPosition(0.99);
         sleep((long) (FEED_TIME_SECONDS * 1000.0));
         diverter.setPosition(0.05);
         sleep((long) (FEED_TIME_SECONDS * 1000.0));
-        //rightFeeder.setPower(STOP_SPEED);
-        //sleep(150);
     }
 
     void launchRight(boolean shotRequested) {
         switch (rightLaunchState) {
             case IDLE:
-                if (shotRequested) {
-                    rightLaunchState = LaunchState.SPIN_UP;
-                }
+                if (shotRequested) rightLaunchState = LaunchState.SPIN_UP;
                 break;
             case SPIN_UP:
                 leftLauncher.setVelocity(launcherTarget);
                 rightLauncher.setVelocity(launcherTarget);
-                if (rightLauncher.getVelocity() > launcherMin) {
-                    rightLaunchState = LaunchState.LAUNCH;
-                }
+                if (rightLauncher.getVelocity() > launcherMin) rightLaunchState = LaunchState.LAUNCH;
                 break;
             case LAUNCH:
                 rightFeeder.setPower(FULL_SPEED);
@@ -478,9 +392,7 @@ public class AutoBigRed_31567 extends LinearOpMode {
         double rb = drive + strafe + turn;
 
         double max = Math.max(Math.max(Math.abs(lf), Math.abs(rf)), Math.max(Math.abs(lb), Math.abs(rb)));
-        if (max > 1.0) {
-            lf /= max; rf /= max; lb /= max; rb /= max;
-        }
+        if (max > 1.0) { lf /= max; rf /= max; lb /= max; rb /= max; }
 
         leftFrontDrive.setPower(lf);
         rightFrontDrive.setPower(rf);
@@ -520,17 +432,13 @@ public class AutoBigRed_31567 extends LinearOpMode {
     }
 
     private void switchDiverterDirection(DiverterDirection diverterDirectionVar) {
-        switch (diverterDirectionVar){
+        switch (diverterDirectionVar) {
             case LEFT:
-                //diverterDirection = DiverterDirection.RIGHT;
                 diverter.setPosition(RIGHT_POSITION);
                 break;
             case RIGHT:
-                //diverterDirection = DiverterDirection.LEFT;
                 diverter.setPosition(LEFT_POSITION);
                 break;
         }
-
     }
-
 }
