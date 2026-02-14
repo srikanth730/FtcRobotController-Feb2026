@@ -17,8 +17,8 @@ import com.qualcomm.robotcore.util.Range;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 
-@Autonomous(name = "Decode 2026: Blue Goal Auto V4 (0.8 + Steps)", group = "Robot")
-public class Decode2026_BlueGoalAuto_Mecanum_Launch_StepTelemetry_V4 extends LinearOpMode {
+@Autonomous(name = "Switcher Auto)", group = "Robot")
+public class SwitcherAuto extends LinearOpMode {
 
     // -------------------- DRIVE --------------------
     private DcMotor leftFrontDrive, rightFrontDrive, leftBackDrive, rightBackDrive;
@@ -36,6 +36,7 @@ public class Decode2026_BlueGoalAuto_Mecanum_Launch_StepTelemetry_V4 extends Lin
     private DcMotor intake = null;
     ElapsedTime leftFeederTimer = new ElapsedTime();
     ElapsedTime rightFeederTimer = new ElapsedTime();
+
     private enum IntakeState {
         ON,
         OFF;
@@ -47,68 +48,72 @@ public class Decode2026_BlueGoalAuto_Mecanum_Launch_StepTelemetry_V4 extends Lin
         LAUNCH,
         LAUNCHING,
     }
+
     private LaunchState leftLaunchState;
     private LaunchState rightLaunchState;
+
     private enum DiverterDirection {
         LEFT,
         RIGHT;
     }
-    //private DiverterDirection diverterDirection = DiverterDirection.LEFT;
-    //private IntakeState intakeState = IntakeState.OFF;
+
+    private DiverterDirection diverterDirection = DiverterDirection.LEFT;
+    private IntakeState intakeState = IntakeState.OFF;
 
     private static final double FEED_TIME_SECONDS = 0.80;
     private static final double STOP_SPEED = 0.0;
     private static final double FULL_SPEED = 1.0;
 
     private static final double LAUNCHER_CLOSE_TARGET_VELOCITY = 1200; // ticks/sec
-    private static final double LAUNCHER_CLOSE_MIN_VELOCITY    = 1175;
+    private static final double LAUNCHER_CLOSE_MIN_VELOCITY = 1175;
 
     private double launcherTarget = LAUNCHER_CLOSE_TARGET_VELOCITY;
-    private double launcherMin    = LAUNCHER_CLOSE_MIN_VELOCITY;
+    private double launcherMin = LAUNCHER_CLOSE_MIN_VELOCITY;
 
-    private static final double LEFT_POSITION  = 0.2962;
+    private static final double LEFT_POSITION = 0.2962;
     private static final double RIGHT_POSITION = 0.0;
 
     // -------------------- COUNTS/INCH --------------------
-    static final double COUNTS_PER_MOTOR_REV  = 537.7;          // Yellow Jacket 312RPM (typical)
-    static final double DRIVE_GEAR_REDUCTION  = 1.0;            // change if external gearing
+    static final double COUNTS_PER_MOTOR_REV = 537.7;          // Yellow Jacket 312RPM (typical)
+    static final double DRIVE_GEAR_REDUCTION = 1.0;            // change if external gearing
     static final double WHEEL_DIAMETER_INCHES = 104.0 / 25.4;   // Ø104mm
     static final double COUNTS_PER_INCH =
             (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) / (WHEEL_DIAMETER_INCHES * Math.PI);
 
     // -------------------- TUNABLES --------------------
-    static final double DRIVE_SPEED  = 0.90; // per your request
-    static final double STRAFE_SPEED = 0.90; // keep lower for accuracy // 60 init
-    static final double TURN_SPEED   = 0.40; // 0.25 init
+    static final double DRIVE_SPEED = 0.80; // per your request
+    static final double STRAFE_SPEED = 0.60; // keep lower for accuracy
+    static final double TURN_SPEED = 0.25;
 
     static final double HEADING_THRESHOLD_DEG = 1.0;
-    static final double P_TURN_GAIN  = 0.02;
+    static final double P_TURN_GAIN = 0.02;
     static final double P_DRIVE_GAIN = 0.03;
 
     static final double MAX_CORRECTION = 0.28;
 
     // -------------------- HEADINGS --------------------
-    static final double HEADING_GOAL_DEG   = 0.0;  // after imu.resetYaw()
+    static final double HEADING_GOAL_DEG = 0.0;  // after imu.resetYaw()
     static final double HEADING_LEFT45_DEG = 45.0;
 
     // -------------------- STEP COUNTER --------------------
     private int stepNum = 0;
-    boolean spunUp = false;
+
+    private Servo.Direction divertorDirection;
 
     @Override
     public void runOpMode() {
 
         // -------------------- MAP HARDWARE --------------------
-        leftFrontDrive  = hardwareMap.get(DcMotor.class, "left_front_drive");
+        leftFrontDrive = hardwareMap.get(DcMotor.class, "left_front_drive");
         rightFrontDrive = hardwareMap.get(DcMotor.class, "right_front_drive");
-        leftBackDrive   = hardwareMap.get(DcMotor.class, "left_back_drive");
-        rightBackDrive  = hardwareMap.get(DcMotor.class, "right_back_drive");
+        leftBackDrive = hardwareMap.get(DcMotor.class, "left_back_drive");
+        rightBackDrive = hardwareMap.get(DcMotor.class, "right_back_drive");
 
-        leftLauncher  = hardwareMap.get(DcMotorEx.class, "left_launcher");
+        leftLauncher = hardwareMap.get(DcMotorEx.class, "left_launcher");
         rightLauncher = hardwareMap.get(DcMotorEx.class, "right_launcher");
-        leftFeeder    = hardwareMap.get(CRServo.class, "left_feeder");
-        rightFeeder   = hardwareMap.get(CRServo.class, "right_feeder");
-        diverter      = hardwareMap.get(Servo.class, "diverter");
+        leftFeeder = hardwareMap.get(CRServo.class, "left_feeder");
+        rightFeeder = hardwareMap.get(CRServo.class, "right_feeder");
+        diverter = hardwareMap.get(Servo.class, "diverter");
 
         intake = hardwareMap.get(DcMotor.class, "intake");
 
@@ -129,7 +134,7 @@ public class Decode2026_BlueGoalAuto_Mecanum_Launch_StepTelemetry_V4 extends Lin
 
         // IMU init (edit if hub orientation differs)
         RevHubOrientationOnRobot.LogoFacingDirection logoDirection = RevHubOrientationOnRobot.LogoFacingDirection.UP;
-        RevHubOrientationOnRobot.UsbFacingDirection usbDirection   = RevHubOrientationOnRobot.UsbFacingDirection.BACKWARD;
+        RevHubOrientationOnRobot.UsbFacingDirection usbDirection = RevHubOrientationOnRobot.UsbFacingDirection.BACKWARD;
         imu = hardwareMap.get(IMU.class, "imu");
         imu.initialize(new IMU.Parameters(new RevHubOrientationOnRobot(logoDirection, usbDirection)));
 
@@ -160,138 +165,53 @@ public class Decode2026_BlueGoalAuto_Mecanum_Launch_StepTelemetry_V4 extends Lin
             telemetry.update();
         }
 
+        //sleep(3000);
+        divertorDirection = diverter.getDirection();
+        reverseDivertorDirection(divertorDirection);
+        diverter.setPosition(0.8);
+        telemetry.addLine("Ready: First Flap: pos 0.8");
+        double currentPos = diverter.getPosition();
+        sleep(3000);
+
+       // reverseDivertorDirection(divertorDirection);
+        diverter.setPosition(0);
+        telemetry.addLine("Ready: Second Flap: pos 0");
+        sleep(3000);
+
+        reverseDivertorDirection(divertorDirection);
+        diverter.setPosition(0.8);
+        telemetry.addLine("Ready: Third Flap: pos 0.8");
+        sleep(3000);
         imu.resetYaw();
 
         // ==================== AUTON STEPS (your latest list) ====================
-        //spunUp = spinUpLauncher(1.25);
-        step(1, "Start: front touching blue goal; launcher in back");
-        leftLauncher.setVelocity(launcherTarget);
-        rightLauncher.setVelocity(launcherTarget);
-        intake.setPower(1.00);
+      /*  telemetry.addLine("--------------------------------");
+        telemetry.addLine("TURN RIGHT");
+        diverterDirection = DiverterDirection.LEFT;
+        switchDiverterDirection(diverterDirection);
+        sleep(3000);
 
-        step(2, "Back 52 in, hold 0 deg");
-        driveStraight(DRIVE_SPEED, -52.0, HEADING_GOAL_DEG);
+        telemetry.addLine("--------------------------------");
+        telemetry.addLine("TURN LEFT");
+        diverterDirection = DiverterDirection.RIGHT;
+        switchDiverterDirection(diverterDirection);
+        sleep(3000);
 
-        step(3, "Shoot first 3 artifacts, wait 3s");
-        rightFeeder.setPower(FULL_SPEED);
-        //sleep(3000);
-        diverter.setPosition(0.99);
-        sleep(500);
-        diverter.setPosition(0.05);
-        sleep(500);
-        diverter.setPosition(0.99);
-        sleep(500);
-        diverter.setPosition(0.05);
-        sleep(500);
-        //diverter.setPosition(0.99);
-        //sleep(500);
-        //diverter.setPosition(0.05);
-        //sleep(500);
+        telemetry.addLine("--------------------------------");
+        telemetry.addLine("TURN RIGHT");
+        diverterDirection = DiverterDirection.LEFT;
+        switchDiverterDirection(diverterDirection);
+        sleep(3000);
+        */
+    }
 
-        rightFeeder.setPower(STOP_SPEED);
-        //shoot3ArtifactsAndWait3s();
+    private void reverseDivertorDirection(Servo.Direction divertorDirection) {
 
-        step(4, "Turn left to 45 deg");
-        turnToHeading(TURN_SPEED, HEADING_LEFT45_DEG);
-
-
-        step(6, "Forward 28 in, hold 45 deg");
-        driveStraight(DRIVE_SPEED, 38.0, HEADING_LEFT45_DEG);
-        //intake.setPower(0.00);
-
-        step(7, "Back 28 in; turn to 0 deg (return step2 pose)");
-        driveStraight(DRIVE_SPEED, -38.0, HEADING_LEFT45_DEG);
-        turnToHeading(TURN_SPEED, HEADING_GOAL_DEG);
-
-        step(8, "Shoot second 3 artifacts, wait 3s");
-        //shoot3ArtifactsAndWait3s();
-        rightFeeder.setPower(FULL_SPEED);
-        //sleep(3000);
-        diverter.setPosition(0.99);
-        sleep(500);
-        diverter.setPosition(0.05);
-        sleep(500);
-        diverter.setPosition(0.99);
-        sleep(500);
-        diverter.setPosition(0.05);
-        sleep(500);
-        //diverter.setPosition(0.99);
-        //sleep(500);
-        //diverter.setPosition(0.05);
-        //sleep(500);
-
-        rightFeeder.setPower(STOP_SPEED);
-
-
-        step(9, "Turn left to 45 deg");
-        turnToHeading(TURN_SPEED, HEADING_LEFT45_DEG);
-
-        //intake.setPower(1.00);
-        step(10, "Strafe left 24 in, hold 45 deg");
-        strafeDistance(STRAFE_SPEED, -31.0, HEADING_LEFT45_DEG);
-        //intake.setPower(0.00);
-
-        step(11, "Forward 28 in, hold 45 deg");
-        driveStraight(DRIVE_SPEED, 42.0, HEADING_LEFT45_DEG);
-
-        step(12, "Back 28; strafe right 24; turn 0 (return step2 pose)");
-        driveStraight(DRIVE_SPEED, -42.0, HEADING_LEFT45_DEG);
-        strafeDistance(STRAFE_SPEED, 31.0, HEADING_LEFT45_DEG);
-        turnToHeading(TURN_SPEED, HEADING_GOAL_DEG);
-
-        step(13, "Shoot third 3 artifacts, wait 3s");
-        //shoot3ArtifactsAndWait3s();
-       // rightFeeder.setPower(STOP_SPEED);
-        rightFeeder.setPower(FULL_SPEED);
-        //sleep(3000);
-        diverter.setPosition(0.99);
-        sleep(500);
-        diverter.setPosition(0.05);
-        sleep(500);
-       // diverter.setPosition(0.99);
-        //sleep(500);
-        //diverter.setPosition(0.05);
-        //sleep(500);
-        //diverter.setPosition(0.99);
-        //sleep(500);
-        //diverter.setPosition(0.05);
-        //sleep(500);
-        rightFeeder.setPower(STOP_SPEED);
-
-        step(14, "Turn left to 45 deg");
-        turnToHeading(TURN_SPEED, HEADING_LEFT45_DEG);
-
-        //intake.setPower(1.00);
-        step(15, "Strafe left 36 in, hold 45 deg");
-        strafeDistance(STRAFE_SPEED, -30.0, HEADING_LEFT45_DEG); //changed from 36 to 42
-        //intake.setPower(0.00);
-/*
-        step(16, "Forward 28 in, hold 45 deg");
-        driveStraight(DRIVE_SPEED, 28.0, HEADING_LEFT45_DEG);
-
-        step(17, "Return step2 pose: back 28; strafe right 36; turn 0");
-        driveStraight(DRIVE_SPEED, -28.0, HEADING_LEFT45_DEG);
-        strafeDistance(STRAFE_SPEED, 30.0, HEADING_LEFT45_DEG); //changed from 36
-        turnToHeading(TURN_SPEED, HEADING_GOAL_DEG);
-
-        step(18, "Shoot 3 artifacts, wait 3s");
-        shoot3ArtifactsAndWait3s();
-        rightFeeder.setPower(STOP_SPEED);
-
-        step(19, "Strafe left 20 in, hold 0 deg");
-        strafeDistance(STRAFE_SPEED, -20.0, HEADING_GOAL_DEG);
-*/
-        // Stop everything
-        //moveRobot(0.0, 0.0, 0.0);
-        stopLauncher();
-        intake.setPower(0.00);
-        rightLauncher.setPower(0.0);
-        leftLauncher.setPower(0.0);
-
-        telemetry.addLine("AUTO COMPLETE");
-        telemetry.update();
-        //sleep(500);
-
+        if(divertorDirection== Servo.Direction.REVERSE){
+            diverter.setDirection(Servo.Direction.FORWARD);
+        } else{
+            diverter.setDirection(Servo.Direction.REVERSE);
+        }
     }
 
     // =========================================================================================
@@ -311,17 +231,21 @@ public class Decode2026_BlueGoalAuto_Mecanum_Launch_StepTelemetry_V4 extends Lin
     // LAUNCHER: Shoot 3 + wait 3 seconds
     // =========================================================================================
     private void shoot3ArtifactsAndWait3s() {
-        //boolean spunUp = spinUpLauncher(1.25);
+        boolean spunUp = spinUpLauncher(1.25);
 
         if (spunUp && opModeIsActive()) {
+            fireOneShotRight();
+            // diverter.setPosition(1.0);
+            //switchDiverterDirection (diverterDirection);
 
-            rightFeeder.setPower(FULL_SPEED); //new change start feeder
-            sleep(1000); //new change for first set launch
             fireOneShotRight();
-            fireOneShotRight();
-            fireOneShotRight();
+            //diverter.setPosition(0.0);
+            //switchDiverterDirection (diverterDirection);
 
-            rightFeeder.setPower(STOP_SPEED); //stop feeder
+            fireOneShotRight();
+            // diverter.setPosition(1.0);
+            //switchDiverterDirection (diverterDirection);
+            rightFeeder.setPower(STOP_SPEED);
         }
 
         //sleep(3000); sleep already in firing shot
@@ -344,12 +268,9 @@ public class Decode2026_BlueGoalAuto_Mecanum_Launch_StepTelemetry_V4 extends Lin
     }
 
     private void fireOneShotRight() {
-        if (!opModeIsActive()) return;
-        //rightFeeder.setPower(FULL_SPEED);
-        //switchDiverterDirection (diverterDirection);
-        diverter.setPosition(0.99);
-        sleep((long) (FEED_TIME_SECONDS * 1000.0));
-        diverter.setPosition(0.05);
+        //if (!opModeIsActive()) return;
+        rightFeeder.setPower(FULL_SPEED);
+        switchDiverterDirection(diverterDirection);
         sleep((long) (FEED_TIME_SECONDS * 1000.0));
         //rightFeeder.setPower(STOP_SPEED);
         //sleep(150);
@@ -479,7 +400,10 @@ public class Decode2026_BlueGoalAuto_Mecanum_Launch_StepTelemetry_V4 extends Lin
 
         double max = Math.max(Math.max(Math.abs(lf), Math.abs(rf)), Math.max(Math.abs(lb), Math.abs(rb)));
         if (max > 1.0) {
-            lf /= max; rf /= max; lb /= max; rb /= max;
+            lf /= max;
+            rf /= max;
+            lb /= max;
+            rb /= max;
         }
 
         leftFrontDrive.setPower(lf);
@@ -511,7 +435,7 @@ public class Decode2026_BlueGoalAuto_Mecanum_Launch_StepTelemetry_V4 extends Lin
 
     private boolean anyBusy() {
         return leftFrontDrive.isBusy() || rightFrontDrive.isBusy() ||
-                leftBackDrive.isBusy()  || rightBackDrive.isBusy();
+                leftBackDrive.isBusy() || rightBackDrive.isBusy();
     }
 
     private double getHeading() {
@@ -520,7 +444,7 @@ public class Decode2026_BlueGoalAuto_Mecanum_Launch_StepTelemetry_V4 extends Lin
     }
 
     private void switchDiverterDirection(DiverterDirection diverterDirectionVar) {
-        switch (diverterDirectionVar){
+        switch (diverterDirectionVar) {
             case LEFT:
                 //diverterDirection = DiverterDirection.RIGHT;
                 diverter.setPosition(RIGHT_POSITION);

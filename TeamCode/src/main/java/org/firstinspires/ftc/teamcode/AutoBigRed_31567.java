@@ -17,8 +17,8 @@ import com.qualcomm.robotcore.util.Range;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 
-@Autonomous(name = "Decode 2026: Blue Goal Auto V4 (0.8 + Steps)", group = "Robot")
-public class Decode2026_BlueGoalAuto_Mecanum_Launch_StepTelemetry_V4 extends LinearOpMode {
+@Autonomous(name = "Auto Big Red 31567 New Bot", group = "Robot")
+public class AutoBigRed_31567 extends LinearOpMode {
 
     // -------------------- DRIVE --------------------
     private DcMotor leftFrontDrive, rightFrontDrive, leftBackDrive, rightBackDrive;

@@ -241,6 +241,10 @@ public class DecodeRi3D extends OpMode {
             diverter.setPosition(0.0);
         }
 
+        if (gamepad1.touchpad_finger_1){
+            reverseIntakeDirection();
+        }
+
         if (gamepad1.aWasPressed()){
             switch (intakeState){
                 case ON:
@@ -340,6 +344,16 @@ public class DecodeRi3D extends OpMode {
                 }
                 break;
         }
+    }
+
+    void reverseIntakeDirection(){
+        DcMotorSimple.Direction intakeDirection=intake.getDirection();
+        if(intakeDirection==DcMotorSimple.Direction.FORWARD){
+            intake.setDirection(DcMotorSimple.Direction.REVERSE);
+        } else{
+            intake.setDirection(DcMotorSimple.Direction.FORWARD);
+        }
+
     }
 
     void launchRight(boolean shotRequested) {
