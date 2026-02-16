@@ -196,11 +196,11 @@ public class AutoBigBlue_31567 extends LinearOpMode {
 
 
         step(6, "Forward 28 in, hold 45 deg");
-        driveStraight(DRIVE_SPEED, 38.0, HEADING_LEFT45_DEG);
+        driveStraight(DRIVE_SPEED, 43.0, HEADING_LEFT45_DEG);
         //intake.setPower(0.00);
 
         step(7, "Back 28 in; turn to 0 deg (return step2 pose)");
-        driveStraight(DRIVE_SPEED, -38.0, HEADING_LEFT45_DEG);
+        driveStraight(DRIVE_SPEED, -43.0, HEADING_LEFT45_DEG);
         turnToHeading(TURN_SPEED, HEADING_GOAL_DEG);
 
         step(8, "Shoot second 3 artifacts, wait 3s");
@@ -223,14 +223,14 @@ public class AutoBigBlue_31567 extends LinearOpMode {
         rightFeeder.setPower(STOP_SPEED);
 
 
-        step(9, "Turn left to 45 deg");
-        turnToHeading(TURN_SPEED, HEADING_LEFT45_DEG);
+      //  step(9, "Turn left to 45 deg");
+      //  turnToHeading(TURN_SPEED, HEADING_LEFT45_DEG);
 
         //intake.setPower(1.00);
         step(10, "Strafe left 24 in, hold 45 deg");
-        strafeDistance(STRAFE_SPEED, -31.0, HEADING_LEFT45_DEG);
+        strafeDistance(STRAFE_SPEED, -36.0, HEADING_LEFT45_DEG);
         //intake.setPower(0.00);
-
+/*
         step(11, "Forward 28 in, hold 45 deg");
         driveStraight(DRIVE_SPEED, 42.0, HEADING_LEFT45_DEG);
 
@@ -265,7 +265,7 @@ public class AutoBigBlue_31567 extends LinearOpMode {
         step(15, "Strafe left 36 in, hold 45 deg");
         strafeDistance(STRAFE_SPEED, -30.0, HEADING_LEFT45_DEG); //changed from 36 to 42
         //intake.setPower(0.00);
-/*
+
         step(16, "Forward 28 in, hold 45 deg");
         driveStraight(DRIVE_SPEED, 28.0, HEADING_LEFT45_DEG);
 

@@ -17,8 +17,8 @@ import com.qualcomm.robotcore.util.Range;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 
-@Autonomous(name = "Auto Big Red 31567 New Bot", group = "Robot")
-public class AutoBigRed_31567 extends LinearOpMode {
+@Autonomous(name = "Auto Strafe Left - 31567", group = "Robot")
+public class AutoStrafeLeft_31567 extends LinearOpMode {
 
     // -------------------- DRIVE --------------------
     private DcMotor leftFrontDrive, rightFrontDrive, leftBackDrive, rightBackDrive;
@@ -143,7 +143,7 @@ public class AutoBigRed_31567 extends LinearOpMode {
         rightFeeder.setDirection(DcMotorSimple.Direction.REVERSE);
 
         while (opModeInInit()) {
-            telemetry.addLine("Ready: Decode 2026 RED Goal Auto");
+            telemetry.addLine("Ready: Decode 2026 STAFE LEFT");
             telemetry.addData("Heading (deg)", "%.1f", getHeading());
             telemetry.addData("Counts/Inch", "%.2f", COUNTS_PER_INCH);
             telemetry.addData("Drive/Strafe/Turn", "%.2f / %.2f / %.2f", DRIVE_SPEED, STRAFE_SPEED, TURN_SPEED);
@@ -154,73 +154,12 @@ public class AutoBigRed_31567 extends LinearOpMode {
 
         // ==================== AUTON STEPS (RED GOAL / RIGHT SIDE MIRROR) ====================
 
-        step(1, "Start: front touching RED goal; launcher in back");
-        leftLauncher.setVelocity(launcherTarget);
-        rightLauncher.setVelocity(launcherTarget);
-        intake.setPower(1.00);
-
-        step(2, "Back 52 in, hold 0 deg");
-        driveStraight(DRIVE_SPEED, -52.0, HEADING_GOAL_DEG);
-
-        step(3, "Shoot first 3 artifacts");
-        rightFeeder.setPower(FULL_SPEED);
-        diverter.setPosition(0.99); sleep(500);
-        diverter.setPosition(0.05); sleep(500);
-        diverter.setPosition(0.99); sleep(500);
-        diverter.setPosition(0.05); sleep(500);
-        rightFeeder.setPower(STOP_SPEED);
-
-        step(4, "Turn RIGHT to -45 deg");
-        turnToHeading(TURN_SPEED, HEADING_RIGHT45_DEG);
-
-        step(6, "Forward 38 in, hold -45 deg");
-        driveStraight(DRIVE_SPEED, 43.0, HEADING_RIGHT45_DEG);
-
-        step(7, "Back 38 in; turn to 0 deg (return step2 pose)");
-        driveStraight(DRIVE_SPEED, -43.0, HEADING_RIGHT45_DEG);
+        step(12, "STRAFE LEFT");
+        strafeDistance(STRAFE_SPEED, -24.0, HEADING_RIGHT45_DEG);
         turnToHeading(TURN_SPEED, HEADING_GOAL_DEG);
 
-        step(8, "Shoot second 3 artifacts");
-        rightFeeder.setPower(FULL_SPEED);
-        diverter.setPosition(0.99); sleep(500);
-        diverter.setPosition(0.05); sleep(500);
-        diverter.setPosition(0.99); sleep(500);
-        diverter.setPosition(0.05); sleep(500);
-        rightFeeder.setPower(STOP_SPEED);
 
-       // step(9, "Turn RIGHT to -45 deg");
-        //turnToHeading(TURN_SPEED, HEADING_RIGHT45_DEG);
-
-        step(10, "Strafe RIGHT 31 in, hold -45 deg");
-        strafeDistance(STRAFE_SPEED, 36.0, HEADING_RIGHT45_DEG);
-/*
-        step(11, "Forward 42 in, hold -45 deg");
-        driveStraight(DRIVE_SPEED, 42.0, HEADING_RIGHT45_DEG);
-
-        step(12, "Back 42; strafe LEFT 31; turn 0 (return step2 pose)");
-        driveStraight(DRIVE_SPEED, -42.0, HEADING_RIGHT45_DEG);
-        strafeDistance(STRAFE_SPEED, -31.0, HEADING_RIGHT45_DEG);
-        turnToHeading(TURN_SPEED, HEADING_GOAL_DEG);
-
-        step(13, "Shoot third 3 artifacts");
-        rightFeeder.setPower(FULL_SPEED);
-        diverter.setPosition(0.99); sleep(500);
-        diverter.setPosition(0.05); sleep(500);
-        rightFeeder.setPower(STOP_SPEED);
-
-        step(14, "Turn RIGHT to -45 deg");
-        turnToHeading(TURN_SPEED, HEADING_RIGHT45_DEG);
-
-        step(15, "Strafe RIGHT 30 in, hold -45 deg");
-        strafeDistance(STRAFE_SPEED, 30.0, HEADING_RIGHT45_DEG);
-*/
-        // Stop everything
-        stopLauncher();
-        intake.setPower(0.00);
-        rightLauncher.setPower(0.0);
-        leftLauncher.setPower(0.0);
-
-        telemetry.addLine("AUTO COMPLETE");
+        telemetry.addLine("AUTO COMPLETE- STRAFE LEFT");
         telemetry.update();
     }
 
@@ -240,62 +179,9 @@ public class AutoBigRed_31567 extends LinearOpMode {
     // =========================================================================================
     // LAUNCHER: Shoot 3 + wait 3 seconds (unused in your current flow)
     // =========================================================================================
-    private void shoot3ArtifactsAndWait3s() {
-        if (spunUp && opModeIsActive()) {
-            rightFeeder.setPower(FULL_SPEED);
-            sleep(1000);
-            fireOneShotRight();
-            fireOneShotRight();
-            fireOneShotRight();
-            rightFeeder.setPower(STOP_SPEED);
-        }
-    }
 
-    private boolean spinUpLauncher(double timeoutSeconds) {
-        leftLauncher.setVelocity(launcherTarget);
-        rightLauncher.setVelocity(launcherTarget);
 
-        long start = System.currentTimeMillis();
-        while (opModeIsActive() && (System.currentTimeMillis() - start) < (long) (timeoutSeconds * 1000.0)) {
-            if (rightLauncher.getVelocity() >= launcherMin) return true;
-            telemetry.addData("Vel L/R", "%.0f / %.0f", leftLauncher.getVelocity(), rightLauncher.getVelocity());
-            telemetry.update();
-            sleep(10);
-        }
-        return rightLauncher.getVelocity() >= launcherMin;
-    }
 
-    private void fireOneShotRight() {
-        if (!opModeIsActive()) return;
-        diverter.setPosition(0.99);
-        sleep((long) (FEED_TIME_SECONDS * 1000.0));
-        diverter.setPosition(0.05);
-        sleep((long) (FEED_TIME_SECONDS * 1000.0));
-    }
-
-    void launchRight(boolean shotRequested) {
-        switch (rightLaunchState) {
-            case IDLE:
-                if (shotRequested) rightLaunchState = LaunchState.SPIN_UP;
-                break;
-            case SPIN_UP:
-                leftLauncher.setVelocity(launcherTarget);
-                rightLauncher.setVelocity(launcherTarget);
-                if (rightLauncher.getVelocity() > launcherMin) rightLaunchState = LaunchState.LAUNCH;
-                break;
-            case LAUNCH:
-                rightFeeder.setPower(FULL_SPEED);
-                rightFeederTimer.reset();
-                rightLaunchState = LaunchState.LAUNCHING;
-                break;
-            case LAUNCHING:
-                if (rightFeederTimer.seconds() > FEED_TIME_SECONDS) {
-                    rightLaunchState = LaunchState.IDLE;
-                    rightFeeder.setPower(STOP_SPEED);
-                }
-                break;
-        }
-    }
 
     private void stopLauncher() {
         leftLauncher.setVelocity(STOP_SPEED);
@@ -307,32 +193,6 @@ public class AutoBigRed_31567 extends LinearOpMode {
     // =========================================================================================
     // DRIVE: Encoder moves + IMU heading hold
     // =========================================================================================
-    private void driveStraight(double maxDriveSpeed, double distanceInches, double headingDeg) {
-        if (!opModeIsActive()) return;
-
-        int moveCounts = (int) Math.round(distanceInches * COUNTS_PER_INCH);
-
-        lfTarget = leftFrontDrive.getCurrentPosition() + moveCounts;
-        rfTarget = rightFrontDrive.getCurrentPosition() + moveCounts;
-        lbTarget = leftBackDrive.getCurrentPosition() + moveCounts;
-        rbTarget = rightBackDrive.getCurrentPosition() + moveCounts;
-
-        setAllTargets(lfTarget, rfTarget, lbTarget, rbTarget);
-        setAllModes(DcMotor.RunMode.RUN_TO_POSITION);
-
-        maxDriveSpeed = Math.abs(maxDriveSpeed);
-        moveRobot(maxDriveSpeed, 0.0, 0.0);
-
-        while (opModeIsActive() && anyBusy()) {
-            double correction = getSteeringCorrection(headingDeg, P_DRIVE_GAIN);
-            if (distanceInches < 0) correction *= -1.0;
-            correction = Range.clip(correction, -MAX_CORRECTION, MAX_CORRECTION);
-            moveRobot(maxDriveSpeed, 0.0, correction);
-        }
-
-        moveRobot(0.0, 0.0, 0.0);
-        setAllModes(DcMotor.RunMode.RUN_USING_ENCODER);
-    }
 
     private void strafeDistance(double maxStrafeSpeed, double distanceInches, double headingDeg) {
         if (!opModeIsActive()) return;

@@ -49,8 +49,8 @@ public class DecodeRi3D extends OpMode {
     final double LAUNCHER_CLOSE_TARGET_VELOCITY = 1200; //in ticks/second for the close goal.
     final double LAUNCHER_CLOSE_MIN_VELOCITY = 1175; //minimum required to start a shot for close goal.
 
-    final double LAUNCHER_FAR_TARGET_VELOCITY = 1350; //Target velocity for far goal
-    final double LAUNCHER_FAR_MIN_VELOCITY = 1325; //minimum required to start a shot for far goal.
+    final double LAUNCHER_FAR_TARGET_VELOCITY = 1400; //Target velocity for far goal
+    final double LAUNCHER_FAR_MIN_VELOCITY = 1375; //minimum required to start a shot for far goal.
 
     double launcherTarget = LAUNCHER_CLOSE_TARGET_VELOCITY; //These variables allow
     double launcherMin = LAUNCHER_CLOSE_MIN_VELOCITY;
