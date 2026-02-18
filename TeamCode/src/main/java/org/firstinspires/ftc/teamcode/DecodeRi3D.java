@@ -173,6 +173,8 @@ public class DecodeRi3D extends OpMode {
          * both work to feed the ball into the robot.
          */
         rightFeeder.setDirection(DcMotorSimple.Direction.REVERSE);
+        leftFeeder.setDirection(DcMotorSimple.Direction.REVERSE);
+
 
         /*
          * Initialize the diverter servo to the starting position (LEFT)
