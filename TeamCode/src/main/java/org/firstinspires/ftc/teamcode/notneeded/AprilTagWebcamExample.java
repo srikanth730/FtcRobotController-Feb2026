@@ -1,11 +1,13 @@
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.notneeded;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 
 @Autonomous
+@Disabled
 public class AprilTagWebcamExample extends OpMode {
 
     AprilTagWebcam aprilTagWebcam = new AprilTagWebcam();

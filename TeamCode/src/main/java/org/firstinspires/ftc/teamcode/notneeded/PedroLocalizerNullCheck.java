@@ -1,6 +1,7 @@
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.notneeded;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.pedropathing.follower.Follower;
 
@@ -9,6 +10,7 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 import java.lang.reflect.Field;
 
 @Autonomous(name="Pedro Localizer Null Check", group="Test")
+@Disabled
 public class PedroLocalizerNullCheck extends LinearOpMode {
 
     @Override

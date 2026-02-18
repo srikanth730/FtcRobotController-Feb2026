@@ -49,8 +49,8 @@ public class DecodeRi3D extends OpMode {
     final double LAUNCHER_CLOSE_TARGET_VELOCITY = 1200; //in ticks/second for the close goal.
     final double LAUNCHER_CLOSE_MIN_VELOCITY = 1175; //minimum required to start a shot for close goal.
 
-    final double LAUNCHER_FAR_TARGET_VELOCITY = 1400; //Target velocity for far goal
-    final double LAUNCHER_FAR_MIN_VELOCITY = 1375; //minimum required to start a shot for far goal.
+    //final double LAUNCHER_FAR_TARGET_VELOCITY = 1450; //Target velocity for far goal 1400 orig
+    //final double LAUNCHER_FAR_MIN_VELOCITY = 1425; //minimum required to start a shot for far goal. 1375 orig
 
     double launcherTarget = LAUNCHER_CLOSE_TARGET_VELOCITY; //These variables allow
     double launcherMin = LAUNCHER_CLOSE_MIN_VELOCITY;
@@ -257,7 +257,7 @@ public class DecodeRi3D extends OpMode {
                     break;
             }
         }
-
+/*
         if (gamepad1.rightBumperWasPressed()) {
             switch (launcherDistance) {
                 case CLOSE:
@@ -272,12 +272,14 @@ public class DecodeRi3D extends OpMode {
                     break;
             }
         }
-
+*/
         /*
          * Now we call our "Launch" function.
          */
        // launchLeft(gamepad1.leftBumperWasPressed());
         launchRight(gamepad2.rightBumperWasPressed());
+        launchLeft(gamepad2.rightBumperWasPressed());
+
 
         /*
          * Show the state and motor powers
