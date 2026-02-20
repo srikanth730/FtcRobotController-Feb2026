@@ -16,8 +16,8 @@ import com.qualcomm.robotcore.util.Range;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 
-@Autonomous(name = "Auto Small Red 31567 New Bot", group = "Robot")
-public class AutoSmallRed_31567 extends LinearOpMode {
+@Autonomous(name = "Auto Small Blue 31567 New Bot", group = "Robot")
+public class AutoSmallBlue_31567 extends LinearOpMode {
 
     // -------------------- DRIVE --------------------
     private DcMotor leftFrontDrive, rightFrontDrive, leftBackDrive, rightBackDrive;
@@ -68,9 +68,9 @@ public class AutoSmallRed_31567 extends LinearOpMode {
 
     // -------------------- HEADINGS --------------------
     static final double HEADING_0_DEG       = 0.0;    // after imu.resetYaw()
-    static final double HEADING_RIGHT30_DEG = -30.0;  // right is negative in your code
-    static final double HEADING_RIGHT90_DEG = -90.0;
-    static final double HEADING_LEFT90_DEG  = 0.0;    // from -90, left 90 returns to 0
+    static final double HEADING_LEFT30_DEG  = 20.0;   // left is positive (mirrored from right -30)
+    static final double HEADING_LEFT90_DEG  = 90.0;   // left 90 deg (mirrored from right -90)
+    static final double HEADING_RIGHT90_DEG = 0.0;    // from 90, right 90 returns to 0
 
     // -------------------- STEP COUNTER --------------------
     private int stepNum = 0;
@@ -132,7 +132,7 @@ public class AutoSmallRed_31567 extends LinearOpMode {
         diverter.setPosition(LEFT_POSITION);
 
         while (opModeInInit()) {
-            telemetry.addLine("Ready: Decode 2026 RED Auto (Small) 13-step");
+            telemetry.addLine("Ready: Decode 2026 BLUE Auto (Small) 13-step");
             telemetry.addData("Heading (deg)", "%.1f", getHeading());
             telemetry.update();
         }
@@ -152,8 +152,8 @@ public class AutoSmallRed_31567 extends LinearOpMode {
         step(2, "Move forward 8 in, hold 0 deg");
         driveStraight(DRIVE_SPEED, 8.0, HEADING_0_DEG);
 
-        step(3, "Turn right 30 deg");
-        turnToHeading(TURN_SPEED, HEADING_RIGHT30_DEG);
+        step(3, "Turn left 30 deg");
+        turnToHeading(TURN_SPEED, HEADING_LEFT30_DEG);
 
         step(4, "Shoot 3 artifacts, wait 2s");
         shoot3ArtifactsExistingBlockThenWait2s();
@@ -164,24 +164,24 @@ public class AutoSmallRed_31567 extends LinearOpMode {
         step(6, "Move forward 16 in, hold 0 deg");
         driveStraight(DRIVE_SPEED, 20.0, HEADING_0_DEG);
 
-        step(7, "Turn right 90 deg");
-        turnToHeading(TURN_SPEED, HEADING_RIGHT90_DEG);
-
-        step(8, "Move forward 42 in (intake collecting), hold -90 deg");
-        driveStraight(DRIVE_SPEED, 50.0, HEADING_RIGHT90_DEG);
-
-        step(9, "Move backwards 42 in, hold -90 deg");
-        driveStraight(DRIVE_SPEED, -50.0, HEADING_RIGHT90_DEG);
-
-        step(10, "Turn left 90 deg (back to 0 deg)");
+        step(7, "Turn left 90 deg");
         turnToHeading(TURN_SPEED, HEADING_LEFT90_DEG);
+
+        step(8, "Move forward 42 in (intake collecting), hold 90 deg");
+        driveStraight(DRIVE_SPEED, 50.0, HEADING_LEFT90_DEG);
+
+        step(9, "Move backwards 42 in, hold 90 deg");
+        driveStraight(DRIVE_SPEED, -50.0, HEADING_LEFT90_DEG);
+
+        step(10, "Turn right 90 deg (back to 0 deg)");
+        turnToHeading(TURN_SPEED, HEADING_RIGHT90_DEG);
 
         step(11, "Move backwards 16 in (return to step 6), hold 0 deg");
         driveStraight(DRIVE_SPEED, -20.0, HEADING_0_DEG);
 
 //added
-        step(12, "Turn right 30 deg");
-        turnToHeading(TURN_SPEED, HEADING_RIGHT30_DEG);
+        step(12, "Turn left 30 deg");
+        turnToHeading(TURN_SPEED, HEADING_LEFT30_DEG);
 
         step(13, "Shoot 3 artifacts, wait 2s");
         shoot3ArtifactsExistingBlockThenWait2s();
